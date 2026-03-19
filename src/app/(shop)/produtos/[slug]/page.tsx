@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Image from 'next/image';
-import { productsApi, cartApi } from '@/lib/api';
+import { productsApi } from '@/lib/api';
 import { useCartStore } from '@/lib/store';
 import toast from 'react-hot-toast';
 import { ShoppingCartIcon, HeartIcon, TruckIcon } from '@heroicons/react/24/outline';
@@ -11,7 +11,7 @@ import { ShoppingCartIcon, HeartIcon, TruckIcon } from '@heroicons/react/24/outl
 export default function ProductPage() {
   const { slug }   = useParams();
   const router     = useRouter();
-  const { setCart } = useCartStore();
+  const { addItem } = useCartStore();
 
   const [product,  setProduct]  = useState<any>(null);
   const [loading,  setLoading]  = useState(true);
@@ -28,15 +28,18 @@ export default function ProductPage() {
       .finally(() => setLoading(false));
   }, [slug]);
 
-  const addToCart = async () => {
+  const addToCart = () => {
     if (!variant && product?.variants?.length > 0) { toast.error('Selecione um tamanho'); return; }
-    setAdding(true);
-    try {
-      const res = await cartApi.addItem({ product_id: product.id, variant_id: variant?.id, quantity: qty });
-      setCart(res.data);
-      toast.success('Adicionado ao carrinho! 🛒');
-    } catch { toast.error('Erro ao adicionar'); }
-    finally { setAdding(false); }
+    addItem({
+      product_id: product.id,
+      variant_id: variant?.id ?? null,
+      name:       product.name,
+      size:       variant?.size ?? null,
+      image:      product.primary_image || '',
+      price:      Number(variant?.price ?? product.price),
+      quantity:   qty,
+    });
+    toast.success('Adicionado ao carrinho! 🛒');
   };
 
   if (loading) return (
@@ -126,8 +129,8 @@ export default function ProductPage() {
           {/* Preço */}
           <div>
             <div className="flex items-baseline gap-3">
-              <span className="text-4xl font-bold text-white">R$ {product.price}</span>
-              {product.is_on_sale && <span className="text-xl text-zinc-500 line-through">R$ {product.compare_price}</span>}
+              <span className="text-4xl font-bold text-white">R$ {Number(product.price).toFixed(2).replace('.', ',')}</span>
+              {product.is_on_sale && <span className="text-xl text-zinc-500 line-through">R$ {Number(product.compare_price).toFixed(2).replace('.', ',')}</span>}
             </div>
             <p className="text-sm text-zinc-400 mt-1">ou 3x de R$ {(product.price / 3).toFixed(2).replace('.', ',')} sem juros</p>
           </div>

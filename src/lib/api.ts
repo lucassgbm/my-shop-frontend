@@ -51,15 +51,11 @@ export const categoriesApi = {
   show: (slug: string) => api.get(`/categories/${slug}`),
 };
 
-// ── Carrinho ──────────────────────────────────────────────────────
+// ── Carrinho (stateless — gerenciado pelo Zustand) ───────────────
 export const cartApi = {
-  get:          ()                          => api.get('/cart'),
-  addItem:      (data: any)                 => api.post('/cart/items', data),
-  updateItem:   (id: string, qty: number)   => api.put(`/cart/items/${id}`, { quantity: qty }),
-  removeItem:   (id: string)                => api.delete(`/cart/items/${id}`),
-  applyCoupon:  (code: string)              => api.post('/cart/coupon', { code }),
-  removeCoupon: ()                          => api.delete('/cart/coupon'),
-  summary:      ()                          => api.get('/cart/summary'),
+  // Valida e recalcula o carrinho no servidor
+  sync:    (items: any[], coupon_code?: string) =>
+    api.post('/cart/summary', { items, coupon_code }),
 };
 
 // ── Checkout ──────────────────────────────────────────────────────
@@ -94,5 +90,6 @@ export const shippingApi = {
 };
 
 export const couponApi = {
-  validate: (code: string, subtotal: number) => api.post('/coupons/validate', { code, subtotal }),
+  validate: (code: string, subtotal: number) =>
+    api.post('/cart/coupon/validate', { code, subtotal }),
 };

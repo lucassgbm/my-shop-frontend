@@ -78,11 +78,11 @@ export default function ProductCard({ product }: { product: Product }) {
         </h3>
         <div className="flex items-center gap-2 mt-1.5">
           <span className="font-semibold text-white">
-            R$ {product.price}
+            R$ {Number(product.price).toFixed(2).replace('.', ',')}
           </span>
           {product.is_on_sale && product.compare_price && (
             <span className="text-xs text-zinc-500 line-through">
-              R$ {product.compare_price}
+              R$ {Number(product.compare_price).toFixed(2).replace('.', ',')}
             </span>
           )}
         </div>

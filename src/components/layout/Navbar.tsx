@@ -13,7 +13,7 @@ export default function Navbar() {
   const [search, setSearch] = useState('');
   const pathname = usePathname();
   const { user, logout } = useAuthStore();
-  const { cart } = useCartStore();
+  const { count } = useCartStore();
 
   const handleLogout = async () => {
     try { await authApi.logout(); } catch {}
@@ -73,9 +73,9 @@ export default function Navbar() {
             {/* Cart */}
             <Link href="/carrinho" className="relative p-2 text-zinc-400 hover:text-white transition-colors">
               <ShoppingCartIcon className="w-5 h-5" />
-              {cart.count > 0 && (
+              {count() > 0 && (
                 <span className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-brand-600 text-white text-[10px] font-bold rounded-full flex items-center justify-center">
-                  {cart.count > 9 ? '9+' : cart.count}
+                  {count() > 9 ? '9+' : count()}
                 </span>
               )}
             </Link>
