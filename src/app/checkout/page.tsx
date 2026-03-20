@@ -28,10 +28,15 @@ export default function CheckoutPage() {
     if (!hydrated) return;
     if (!user) { router.push('/auth/login'); return; }
     if (items.length === 0) { router.push('/carrinho'); return; }
-    addressesApi.list().then((r) => {
-      setAddresses(r.data);
-      if (r.data.length > 0) setAddressId(r.data[0].id);
-    }).catch(() => {});
+    addressesApi.list()
+      .then((r) => {
+        console.log('Endereços carregados:', r.data);
+        setAddresses(r.data);
+        if (r.data.length > 0) setAddressId(r.data[0].id);
+      })
+      .catch((err) => {
+        console.error('Erro ao carregar endereços:', err.response?.status, err.response?.data);
+      });
   }, [user, items.length]);
 
   const calcShipping = async () => {

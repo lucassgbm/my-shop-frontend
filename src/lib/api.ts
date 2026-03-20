@@ -6,10 +6,25 @@ const api = axios.create({
   headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
 });
 
-// Injeta token automaticamente
+// Injeta token automaticamente — lê do Zustand store (localStorage)
 api.interceptors.request.use((config) => {
   if (typeof window !== 'undefined') {
-    const token = localStorage.getItem('token');
+    // Tenta pegar do localStorage direto primeiro
+    let token = localStorage.getItem('token');
+
+    // Fallback: lê do persist do Zustand
+    if (!token) {
+      try {
+        const authStore = localStorage.getItem('auth-store');
+        if (authStore) {
+          const parsed = JSON.parse(authStore);
+          token = parsed?.state?.token || null;
+          // Restaura no localStorage para próximas requisições
+          if (token) localStorage.setItem('token', token);
+        }
+      } catch {}
+    }
+
     if (token) config.headers.Authorization = `Bearer ${token}`;
   }
   return config;
