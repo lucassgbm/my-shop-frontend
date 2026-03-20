@@ -20,8 +20,12 @@ export default function CheckoutPage() {
   const [payMethod,   setPayMethod]   = useState<'pix' | 'card'>('pix');
   const [loading,     setLoading]     = useState(false);
   const [calcLoading, setCalcLoading] = useState(false);
+  const [hydrated,    setHydrated]    = useState(false);
+
+  useEffect(() => { setHydrated(true); }, []);
 
   useEffect(() => {
+    if (!hydrated) return;
     if (!user) { router.push('/auth/login'); return; }
     if (items.length === 0) { router.push('/carrinho'); return; }
     addressesApi.list().then((r) => {
@@ -82,6 +86,12 @@ export default function CheckoutPage() {
 
   const shippingPrice = shippingSel ? parseFloat(shippingSel.price) : 0;
   const grandTotal    = total() + shippingPrice;
+
+  if (!hydrated) return (
+    <div className="min-h-screen flex items-center justify-center">
+      <div className="w-6 h-6 border-2 border-brand-600 border-t-transparent rounded-full animate-spin" />
+    </div>
+  );
 
   if (!user || items.length === 0) return null;
 
