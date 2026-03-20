@@ -29,6 +29,15 @@ export default function CheckoutPage() {
     return () => clearTimeout(timer);
   }, []);
 
+  // Auto-calcula frete quando CEP muda e tem produtos
+  useEffect(() => {
+    if (!cep || cep.replace(/\D/g, '').length < 8 || items.length === 0) return;
+    const timer = setTimeout(() => {
+      calcShipping();
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [cep]);
+
   // Redireciona se não autenticado
   useEffect(() => {
     if (!ready) return;
@@ -138,7 +147,15 @@ export default function CheckoutPage() {
                   >
                     <input type="radio" name="address" value={a.id}
                       checked={addressId === a.id}
-                      onChange={() => setAddressId(a.id)}
+                      onChange={() => {
+                      setAddressId(a.id);
+                      // Atualiza o CEP e limpa o frete selecionado
+                      if (a.zipcode) {
+                        setCep(a.zipcode.replace(/\D/g, ''));
+                        setShipping([]);
+                        setShippingSel(null);
+                      }
+                    }}
                       className="mt-0.5 accent-red-600"
                     />
                     <div className="text-sm">
