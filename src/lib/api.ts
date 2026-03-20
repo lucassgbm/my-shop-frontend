@@ -6,37 +6,41 @@ const api = axios.create({
   headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
 });
 
-// Injeta token automaticamente — lê do Zustand store (localStorage)
-api.interceptors.request.use((config) => {
-  if (typeof window !== 'undefined') {
-    // Tenta pegar do localStorage direto primeiro
-    let token = localStorage.getItem('token');
-
-    // Fallback: lê do persist do Zustand
-    if (!token) {
-      try {
-        const authStore = localStorage.getItem('auth-store');
-        if (authStore) {
-          const parsed = JSON.parse(authStore);
-          token = parsed?.state?.token || null;
-          // Restaura no localStorage para próximas requisições
-          if (token) localStorage.setItem('token', token);
-        }
-      } catch {}
+// Lê o token de qualquer lugar onde possa estar salvo
+function getToken(): string | null {
+  if (typeof window === 'undefined') return null;
+  // 1. Tenta direto
+  const direct = localStorage.getItem('token');
+  if (direct) return direct;
+  // 2. Tenta dentro do Zustand persist
+  try {
+    const store = localStorage.getItem('auth-store');
+    if (store) {
+      const parsed = JSON.parse(store);
+      const token  = parsed?.state?.token;
+      if (token) {
+        localStorage.setItem('token', token); // sincroniza
+        return token;
+      }
     }
+  } catch {}
+  return null;
+}
 
-    if (token) config.headers.Authorization = `Bearer ${token}`;
-  }
+// Injeta token em todas as requisições
+api.interceptors.request.use((config) => {
+  const token = getToken();
+  if (token) config.headers.Authorization = `Bearer ${token}`;
   return config;
 });
 
-// Redireciona para login em 401
+// Trata erros globais
 api.interceptors.response.use(
   (res) => res,
   (err) => {
     if (err.response?.status === 401 && typeof window !== 'undefined') {
       localStorage.removeItem('token');
-      localStorage.removeItem('user');
+      localStorage.removeItem('auth-store');
       window.location.href = '/auth/login';
     }
     return Promise.reject(err);
@@ -44,6 +48,7 @@ api.interceptors.response.use(
 );
 
 export default api;
+export { getToken };
 
 // ── Auth ──────────────────────────────────────────────────────────
 export const authApi = {
@@ -66,10 +71,9 @@ export const categoriesApi = {
   show: (slug: string) => api.get(`/categories/${slug}`),
 };
 
-// ── Carrinho (stateless — gerenciado pelo Zustand) ───────────────
+// ── Carrinho ──────────────────────────────────────────────────────
 export const cartApi = {
-  // Valida e recalcula o carrinho no servidor
-  sync:    (items: any[], coupon_code?: string) =>
+  sync: (items: any[], coupon_code?: string) =>
     api.post('/cart/summary', { items, coupon_code }),
 };
 
@@ -81,27 +85,28 @@ export const checkoutApi = {
 
 // ── Pedidos ───────────────────────────────────────────────────────
 export const ordersApi = {
-  list: (params?: any)  => api.get('/orders', { params }),
-  show: (id: number)    => api.get(`/orders/${id}`),
+  list: (params?: any) => api.get('/orders', { params }),
+  show: (id: number)   => api.get(`/orders/${id}`),
 };
 
 // ── Endereços ─────────────────────────────────────────────────────
 export const addressesApi = {
-  list:    ()             => api.get('/addresses'),
-  create:  (data: any)   => api.post('/addresses', data),
+  list:    ()                      => api.get('/addresses'),
+  create:  (data: any)             => api.post('/addresses', data),
   update:  (id: number, data: any) => api.put(`/addresses/${id}`, data),
-  destroy: (id: number)  => api.delete(`/addresses/${id}`),
+  destroy: (id: number)            => api.delete(`/addresses/${id}`),
 };
 
 // ── Wishlist ──────────────────────────────────────────────────────
 export const wishlistApi = {
-  list:   ()               => api.get('/wishlist'),
+  list:   ()                  => api.get('/wishlist'),
   toggle: (productId: number) => api.post(`/wishlist/${productId}`),
 };
 
 // ── Frete e Cupom ─────────────────────────────────────────────────
 export const shippingApi = {
-  calculate: (cep: string, items: any[]) => api.post('/shipping/calculate', { cep, items }),
+  calculate: (cep: string, items: any[]) =>
+    api.post('/shipping/calculate', { cep, items }),
 };
 
 export const couponApi = {
