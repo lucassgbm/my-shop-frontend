@@ -35,7 +35,16 @@ export const useAuthStore = create<AuthStore>()(
       },
       isAdmin: () => get().user?.roles?.includes('admin') ?? false,
     }),
-    { name: 'auth-store', partialize: (s) => ({ user: s.user, token: s.token }) }
+    {
+      name: 'auth-store',
+      partialize: (s) => ({ user: s.user, token: s.token }),
+      // Ao rehidratar do localStorage, sincroniza o token
+      onRehydrateStorage: () => (state) => {
+        if (state?.token && typeof window !== 'undefined') {
+          localStorage.setItem('token', state.token);
+        }
+      },
+    }
   )
 );
 
