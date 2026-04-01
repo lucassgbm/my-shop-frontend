@@ -15,6 +15,7 @@
     background-color: #0a0a0a;
     color: #f0f0f0;
     -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 
   ::selection {
@@ -23,34 +24,101 @@
   }
 
   ::-webkit-scrollbar { width: 6px; }
-  ::-webkit-scrollbar-track { background: #111; }
-  ::-webkit-scrollbar-thumb { background: #333; border-radius: 3px; }
+  ::-webkit-scrollbar-track { background: #0a0a0a; }
+  ::-webkit-scrollbar-thumb { background: #2a2a2a; border-radius: 3px; }
   ::-webkit-scrollbar-thumb:hover { background: #ef4444; }
 }
 
 @layer components {
+  /* ── Buttons ── */
   .btn-primary {
-    @apply bg-brand-600 hover:bg-brand-700 text-white font-semibold px-6 py-3 rounded-xl transition-all duration-200 active:scale-95;
+    @apply inline-flex items-center justify-center gap-2
+           bg-brand-600 hover:bg-brand-500 active:bg-brand-700
+           text-white font-semibold px-6 py-3 rounded-xl
+           transition-all duration-200 active:scale-95
+           shadow-lg shadow-brand-900/50 hover:shadow-brand-600/40;
   }
 
   .btn-outline {
-    @apply border border-zinc-700 hover:border-zinc-500 text-zinc-300 hover:text-white font-semibold px-6 py-3 rounded-xl transition-all duration-200 active:scale-95;
+    @apply inline-flex items-center justify-center gap-2
+           border border-zinc-700 hover:border-zinc-500
+           text-zinc-300 hover:text-white
+           font-semibold px-6 py-3 rounded-xl
+           transition-all duration-200 active:scale-95
+           hover:bg-zinc-800/50;
   }
 
+  .btn-ghost {
+    @apply inline-flex items-center justify-center gap-2
+           text-zinc-400 hover:text-white hover:bg-zinc-800/60
+           font-medium px-4 py-2 rounded-lg
+           transition-all duration-200;
+  }
+
+  /* ── Cards ── */
   .card {
-    @apply bg-dark-800 border border-zinc-800 rounded-2xl overflow-hidden;
+    @apply bg-dark-800 border border-zinc-800/80 rounded-2xl overflow-hidden
+           transition-all duration-300;
   }
 
+  .card-hover {
+    @apply card hover:border-zinc-700 hover:-translate-y-0.5
+           hover:shadow-xl hover:shadow-black/40;
+  }
+
+  .glass {
+    @apply bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl;
+  }
+
+  /* ── Inputs ── */
   .input {
-    @apply w-full bg-zinc-900 border border-zinc-700 text-white rounded-xl px-4 py-3 text-sm focus:border-brand-500 focus:outline-none transition-colors placeholder:text-zinc-600;
+    @apply w-full bg-zinc-900/80 border border-zinc-800 text-white rounded-xl
+           px-4 py-3 text-sm
+           focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500/30
+           transition-all placeholder:text-zinc-600;
   }
 
+  /* ── Badges ── */
   .badge {
     @apply inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-full;
   }
 
+  /* ── Typography ── */
   .section-title {
     font-family: var(--font-display), sans-serif;
-    @apply text-4xl md:text-5xl tracking-wide uppercase;
+    @apply text-4xl md:text-5xl tracking-wide uppercase leading-none;
+  }
+
+  .gradient-text {
+    @apply bg-gradient-to-r from-white via-zinc-200 to-zinc-400 bg-clip-text text-transparent;
+  }
+
+  /* ── Dividers ── */
+  .divider {
+    @apply border-t border-zinc-800/60;
+  }
+
+  /* ── Skeleton loader ── */
+  .skeleton {
+    background: linear-gradient(90deg, #1c1c1e 25%, #252525 50%, #1c1c1e 75%);
+    background-size: 200% 100%;
+    @apply animate-shimmer rounded-xl;
+  }
+}
+
+@layer utilities {
+  .text-gradient-brand {
+    background: linear-gradient(135deg, #ef4444, #ff6b6b);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .glow-brand {
+    box-shadow: 0 0 40px -5px rgba(239, 68, 68, 0.25);
+  }
+
+  .glow-brand-sm {
+    box-shadow: 0 0 20px -5px rgba(239, 68, 68, 0.2);
   }
 }
